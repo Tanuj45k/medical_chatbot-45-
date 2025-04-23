@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import random
+import os
 
 app = Flask(__name__)
 
-# Possible symptoms, diseases, medicines, and workouts
+# Symptoms, Diseases, Medicines, Workouts
 symptoms = ["Fever", "Cough", "Headache", "Stomach Pain", "Chest Pain", "Rash", "Weakness", "Shortness of Breath",
             "Joint Pain", "Nausea", "Runny Nose", "Sore Throat", "Dizziness", "Blurred Vision", "Back Pain",
             "Fatigue", "Insomnia", "Vomiting", "Constipation", "Diarrhea", "High Blood Pressure", "Low Blood Sugar",
@@ -35,14 +36,12 @@ def home():
 @app.route('/chat', methods=['POST'])
 def chat():
     user_input = request.json['user_input']
-
-    # You can integrate a more advanced model or rule-based logic here
-    response = "Based on your symptom: '{}' we suggest the following: \n\n".format(user_input)
-    response += random.choice(diseases) + "\n"
+    response = f"Based on your symptom: '{user_input}', we suggest the following:\n\n"
+    response += "Disease: " + random.choice(diseases) + "\n"
     response += "Medicine: " + random.choice(medicines) + "\n"
     response += "Recommended workout: " + random.choice(workouts)
-
     return jsonify({'response': response})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
