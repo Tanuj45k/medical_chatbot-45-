@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Chatbot</title>
+    <!-- Link to the static CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Medical Chatbot</h1>
+        <div class="chat-box" id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Enter symptom..." onkeydown="if(event.key === 'Enter'){sendMessage();}">
+        <button onclick="sendMessage()">Send</button>
+        <div class="loader" id="loader" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Function to send message
+        function sendMessage() {
+            let inputField = document.getElementById("user-input");
+            let userInput = inputField.value.trim();
+
+            if (userInput !== "") {
+                displayMessage(userInput, "user");
+                inputField.value = ""; // Clear input field
+
+                document.getElementById("loader").style.display = "block"; // Show loader
+
+                // Sending user input to Flask backend
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_input: userInput })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("loader").style.display = "none"; // Hide loader
+                    displayMessage(data.response, "bot"); // Display response from bot
+                })
+                .catch(error => {
+                    document.getElementById("loader").style.display = "none"; // Hide loader
+                    displayMessage("Something went wrong. Please try again.", "bot");
+                });
+            }
+        }
+
+        // Function to display messages
+        function displayMessage(message, sender) {
+            const chatBox = document.getElementById("chat-box");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", sender);
+            messageDiv.innerHTML = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto scroll to the bottom
+        }
+    </script>
+</body>
+</html>
